@@ -54,6 +54,7 @@ char data_packet[50];
 Servo Servo1;
 Servo Servo2;
 
+//Global variables for servo positions
 int Servo1Pos = 90;
 int Servo2Pos = 90;
 
@@ -95,12 +96,13 @@ void setup() {
   digitalWrite(enB, HIGH);
 
 
-  //turn the PID on
+  //PID for driving in a straight line using IMU Yaw data
   DriveSetpoint = 0;
   DrivePID.SetSampleTime(100);
   DrivePID.SetOutputLimits(-10, 10);
   DrivePID.SetMode(AUTOMATIC);
 
+  //PID for turning on the spot using IMU Yaw data
   TurnSetpoint = 0;
   TurnPID.SetSampleTime(100);
   TurnPID.SetOutputLimits(-50, 50);
@@ -139,6 +141,7 @@ void setup() {
 
 
   //check if IMU yaw data has settled. Move on only when steady readings are present
+  //Needs 20 identical readings before moving on
   int counter = 0;
   GetMPUdata();
   int YawPrev = Yawangle;
@@ -161,8 +164,8 @@ void setup() {
 
   }
 
-  TurnSetpoint = Yawangle;
-  DriveSetpoint = Yawangle;
+  //TurnSetpoint = Yawangle;
+  //DriveSetpoint = Yawangle;
   Serial.println("Setup complete");
 }
 
@@ -182,6 +185,12 @@ void loop() {
       sscanf (databuffer, "%d,%d", &Command, &Data);
       memset(databuffer, 0, sizeof(databuffer));//clear data buffer when command has been received
 
+      //Serial commands
+      // 0,data - Stops robot wheels. Ignores data but needs it to be sent
+      // 1,data - Robot forward or reverse, data is speed reference. 0-255 forward, 0--255 reverse
+      // 2,data - Turn on the spot. Data is target angle
+      // 3,data - Servo 1 position, data is angle
+      // 4,data - Servo 1 position, data is angle
       switch (Command) {
       case 0:
         LeftWheel = 0;
@@ -351,6 +360,7 @@ int ReadSonar(int Pin) //Read sonar sensor
 int ResolveWrap(int Yawangle, int Setpoint)
 {
 //Some maths to deal with wrap around at 179,-179 to feed sensible values to PID controller
+//Calculates consistent error value when operating near wrap around point
     int angleDiff = Yawangle - Setpoint;
     int newYaw;
     if (angleDiff < -179) {
