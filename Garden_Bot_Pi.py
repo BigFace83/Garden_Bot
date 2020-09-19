@@ -53,7 +53,7 @@ capture.set(3,imagewidth) #1024 640 1280 800 384
 capture.set(4,imageheight) #600 480 960 600 288
 
 # Define the codec and create VideoWriter object
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
+#fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
 cv2.waitKey(50)
 
@@ -104,7 +104,7 @@ def Averageflow(matches, kp0, kp1):
 def DistfromVision(img1, img2):
     frame1, kp1, des1 = FindORB(img1)
     frame2, kp2, des2 = FindORB(img2)
-    
+
     print 'Keypoint lengths', len(kp1), len(kp2)
 
     if (len(kp1) > 1) and (len(kp2) > 1):
@@ -113,14 +113,14 @@ def DistfromVision(img1, img2):
         if len(matches) > 1:
             avdist, x, y, avang = Averageflow(matches, kp1, kp2)
             return avdist*calib
-                
+
         else:
             return None
     else:
         return None
-        
 
-   
+
+
 #################################################################################
 def CaptureFrame():
     ret,img = capture.read()
@@ -132,10 +132,10 @@ def CaptureFrame():
     return img
 
 def LEDBlue():
-    GPIO.output(17,GPIO.HIGH) 
-    GPIO.output(22,GPIO.HIGH) 
+    GPIO.output(17,GPIO.HIGH)
+    GPIO.output(22,GPIO.HIGH)
     GPIO.output(27,GPIO.LOW)
-    
+
 def LEDRed():
     GPIO.output(17,GPIO.HIGH)
     GPIO.output(22,GPIO.LOW)
@@ -154,16 +154,16 @@ def LEDOff():
 def CreateFiles():
     print "Creating files for writing"
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    os.chdir("/home/pi/RC_Robot")
+    os.chdir("/home/pi/Garden_Bot")
     try:
         os.mkdir(timestr, 0o777)
     except OSError:
         print "Creation of directory failed"
 
     os.chdir(timestr)
-    out = cv2.VideoWriter(timestr +'.avi',fourcc, 10.0, (imagewidth,imageheight))
+    #out = cv2.VideoWriter(timestr +'.avi',fourcc, 10.0, (imagewidth,imageheight))
     f = open("Data.txt", 'w')
-    return out, f
+    return f
 
 def Shutdown(event):
     print("Shutting Down")
@@ -190,7 +190,7 @@ def readserial():
         line = serHC05.readline() # keep reading until...
         if serHC05.inWaiting()==0: #...all data is read. Previous data is discarded to keep robot responsive
             return line.rstrip('\r\n') #Return most recent data
-    
+
 
 def sendcommand(serialdata):
     serArd.write(serialdata + '\n') #Write data string, newline terminated
@@ -202,15 +202,7 @@ def readserialArd():
         line = serArd.readline() # keep reading until...
         if serArd.inWaiting()==0: #...all data is read. Previous data is discarded to keep robot responsive
             return line.rstrip('\r\n') #Return most recent data
-    
-'''
-def readserialArd():
-    if serArd.inWaiting()>0: #If data is available
-        line = serArd.readline()
-        return line.rstrip('\r\n') #Return packet
-    else: #If no data to read, return None
-        return None
-'''
+
 
 def flushserialArd():
     while serArd.inWaiting()>0: #If data is available
@@ -219,48 +211,47 @@ def flushserialArd():
 def closeserial():
     ser.close()
 
-def LEDredflash(): #Flash LED red 
+def LEDredflash(): #Flash LED red
     for x in range (0, 1, 1):
         LEDRed()
         time.sleep(0.1)
         LEDOff()
         time.sleep(0.1)
 
-def Scan(out, f, imagecounter):
+def Scan(f, imagecounter):
     arddata = readserialArd() #get most up to date values from Arduino
-    if arddata is not None:
-        ardarray = [int(x) for x in data.split(',')]
-        yaw = ardarray[2]
-        Servo1 = 0
-        Servo2 = 90
-        SetHeadPos(Servo1, Servo2)
-        CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
-        imagecounter+=1
-        Servo1 = 45
-        SetHeadPos(Servo1, Servo2)
-        CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
+    ardarray = [int(x) for x in arddata.split(',')]
+    yaw = ardarray[2]
+    Servo1 = 0
+    Servo2 = 90
+    SetHeadPos(Servo1, Servo2)
+    CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
+    imagecounter+=1
+    Servo1 = 45
+    SetHeadPos(Servo1, Servo2)
+    CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
 
-        imagecounter+=1
-        Servo1 = 90
-        SetHeadPos(Servo1, Servo2)
-        CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
+    imagecounter+=1
+    Servo1 = 90
+    SetHeadPos(Servo1, Servo2)
+    CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
 
-        imagecounter+=1
-        Servo1 = 135
-        SetHeadPos(Servo1, Servo2)
-        CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
+    imagecounter+=1
+    Servo1 = 135
+    SetHeadPos(Servo1, Servo2)
+    CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
 
-        imagecounter+=1
-        Servo1 = 180
-        SetHeadPos(Servo1, Servo2)
-        CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
+    imagecounter+=1
+    Servo1 = 180
+    SetHeadPos(Servo1, Servo2)
+    CaptureandSave(f, imagecounter, yaw, Servo1, Servo2)
 
-        imagecounter+=1
-        Servo1 = 90
-        SetHeadPos(Servo1, Servo2)
- 
-        return imagecounter
-    
+    imagecounter+=1
+    Servo1 = 90
+    SetHeadPos(Servo1, Servo2)
+
+    return imagecounter
+
 
 def CaptureandSave(f, name, yaw, Servo1, Servo2):
     img = CaptureFrame()
@@ -268,74 +259,85 @@ def CaptureandSave(f, name, yaw, Servo1, Servo2):
     cv2.imwrite(filename, img)     # save frame as JPEG file
     f.write(str(1) + "," + str(yaw) + "," + str(Servo1) + "," + str(Servo2) + "," + str(name) + '\n')
 
-def Datatofile(f, yaw, Servo1, Servo2):
-    f.write(str(0) + "," + str(yaw) + "," + str(Servo1) + "," + str(Servo2) + '\n')
+def Datatofile(f, Dist, Servo1, Servo2):
+    arddata = readserialArd() #get most up to date values from Arduino
+    ardarray = [int(x) for x in arddata.split(',')]
+    yaw = ardarray[2]
+    f.write(str(0) + "," + str(yaw) + "," + str(int(Dist)) + "," + str(Servo1) + "," + str(Servo2) + '\n')
 
 def SetHeadPos(Servo1, Servo2):
     sendcommand(str(3) + "," + str(Servo1))
     sendcommand(str(4) + "," + str(Servo2))
     time.sleep(1)
 
+
 def Turn(angle, f):
     arddata = readserialArd() #get most up to date values from Arduino
-    if arddata is not None:
+    ardarray = [int(x) for x in arddata.split(',')]
+    yaw = ardarray[2]
+
+    newyaw = yaw + angle #Turn robot 180 degrees
+    if (newyaw > 179):
+        newyaw = newyaw - 359
+    elif (newyaw < -179):
+        newyaw = newyaw + 359
+    print yaw, newyaw
+    sendcommand(str(2) + "," + str(newyaw))
+
+    yawcounter = 0
+    while True:
+        arddata = readserialArd() #get most up to date values from Arduino
+
         ardarray = [int(x) for x in arddata.split(',')]
         yaw = ardarray[2]
-        
-        newyaw = yaw + angle #Turn robot 180 degrees
-        if (newyaw > 179):
-            newyaw = newyaw - 359
-        elif (newyaw < -179):
-            newyaw = newyaw + 359
-        print yaw, newyaw
-        sendcommand(str(2) + "," + str(newyaw))
 
-        while True:
-            arddata = readserialArd() #get most up to date values from Arduino
-            if arddata is not None:
-                ardarray = [int(x) for x in arddata.split(',')]
-                yaw = ardarray[2]
-               
-                if (yaw == newyaw):
-                    Datatofile(f, yaw, Servo1, Servo2)
-                    sendcommand(str(0) + "," + str(0))
-                    break
+        if (yaw == newyaw):
+            yawcounter += 1
 
-   
-def Drive(speed, dist):
+        if (yawcounter > 2):
+            Datatofile(f, 0, Servo1, Servo2)
+            sendcommand(str(0) + "," + str(0))
+            break
+
+
+def Drive(speed, dist,f):
     totaldist = 0
     imgold = CaptureFrame()
-    SetHeadPos(90, 60)
+    SetHeadPos(90, 50)
     sendcommand(str(1) + "," + str(speed))
     lastdist = 0
+    arddata = readserialArd() #get most up to date values from Arduino
+    ardarray = [int(x) for x in arddata.split(',')]
+    yaw = ardarray[2]
     while True:
         imgnew = CaptureFrame()
         estdist = DistfromVision(imgold, imgnew)
         if estdist is not None:
             totaldist += estdist
-            lastdist = estdist   
+            lastdist = estdist
         else:
             totaldist += lastdist
         print str(totaldist) + "mm"
         if totaldist >= dist:
+            Datatofile(f, totaldist, Servo1, Servo2)
             break
         imgold = imgnew
 
 
     sendcommand(str(0) + "," + str(0))
-    
 
+
+
+####################################################################################
+#Main
+####################################################################################
 
 GPIO.add_event_detect(21, GPIO.FALLING, callback=Shutdown, bouncetime=2000)
-
-
 LEDBlue()
 arddata = readserialArd() #Wait here on start-up until data is received from Arduino
 time.sleep(1) #Wait a sec...
 flushserialArd() #Clear input buffer ready for good data
-
 LEDGreen()
-
 
 
 while True:
@@ -345,50 +347,26 @@ while True:
         dataarray = [int(x) for x in data.split(',')]
         if dataarray[5] == 0: #Right button clicked
             LEDRed()
-            out, f = CreateFiles()
-            arddata = readserialArd() #get most up to date values from Arduino
-            print arddata
-            if arddata is not None:
-                ardarray = [int(x) for x in data.split(',')]
-                yaw = ardarray[2]
-                Datatofile(f, yaw, Servo1, Servo2)
-            #imcount = Scan(out, f, 0)
-            #Turn(180, f)
-            #imcount = Scan(out, f, imcount)
-            #Turn(180, f)
-            #imcount = Scan(out, f, imcount)
-            Drive(220, 1000)
-            #imcount = Scan(out, f, imcount)
+            f = CreateFiles()
+            Datatofile(f, 0, Servo1, Servo2)
+          
+            Drive(200, 500, f)
+            imcount = Scan(f, 0)
+            Turn(90, f)
+
+            Drive(200, 500, f)
+            imcount = Scan(f, imcount)
+            Turn(90, f)
+
+            Drive(200, 500, f)
+            imcount = Scan(f, imcount)
+            Turn(90, f)
+
+            Drive(200, 500, f)
+            imcount = Scan(f, imcount)
+            Turn(90, f)
+
+            imcount = Scan(f, imcount)
             LEDGreen()
             f.close()
             print 'Sequence Complete'
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-

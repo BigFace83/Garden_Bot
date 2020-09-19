@@ -68,7 +68,7 @@ double TurnSetpoint, TurnInput, TurnOutput;
 
 //Specify the links and initial tuning parameters
 PID DrivePID(&DriveInput, &DriveOutput, &DriveSetpoint, 0.1, 0.0, 0.5, DIRECT);
-PID TurnPID(&TurnInput, &TurnOutput, &TurnSetpoint, 10.0, 4.0, 3.0, DIRECT);
+PID TurnPID(&TurnInput, &TurnOutput, &TurnSetpoint, 4.0, 0.0, 1.5, DIRECT);
 float RightWheel = 0.0;
 float LeftWheel = 0.0;
 
@@ -105,7 +105,7 @@ void setup() {
   //PID for turning on the spot using IMU Yaw data
   TurnSetpoint = 0;
   TurnPID.SetSampleTime(100);
-  TurnPID.SetOutputLimits(-50, 50);
+  TurnPID.SetOutputLimits(-255, 255);
   TurnPID.SetMode(AUTOMATIC);
 
 
